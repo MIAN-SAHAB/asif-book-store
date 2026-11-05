@@ -1,0 +1,162 @@
+"use client";
+
+import Image from "next/image";
+import { useRef } from "react";
+import { gsap, useGSAP } from "@/lib/gsap";
+
+const WORDS = ["Asif", "Book", "Store"];
+const CATS = ["Books", "Uniforms", "Gadgets", "Watches"];
+
+/**
+ * Section 1 — Preloader.
+ * Counter + progress bar + SVG ring draw + clip-path logo reveal,
+ * then a layered split-curtain exit that hands off to the Hero.
+ */
+export default function Preloader({ onComplete }: { onComplete: () => void }) {
+  const root = useRef<HTMLDivElement>(null);
+  const counter = useRef<HTMLSpanElement>(null);
+
+  useGSAP(
+    () => {
+      const html = document.documentElement;
+      html.classList.add("is-loading");
+      if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+      window.scrollTo(0, 0);
+
+      const progress = { v: 0 };
+      const LOAD = 2.4;
+      const tl = gsap.timeline({ defaults: { ease: "expo.out" } });
+
+      tl.from(".pl-char", { yPercent: 120, rotate: 8, stagger: 0.035, duration: 1.1 }, 0.1)
+        .from(".pl-cat", { y: 14, autoAlpha: 0, stagger: 0.12, duration: 0.8 }, 0.5)
+        .to(".pl-ring", { strokeDashoffset: 0, duration: LOAD, ease: "power2.inOut" }, 0.1)
+        .to(".pl-ring-gold", { strokeDashoffset: 0.75, duration: LOAD, ease: "power3.inOut" }, 0.2)
+        .to(".pl-orbit", { rotate: 300, duration: LOAD + 0.6, ease: "power2.inOut" }, 0)
+        .to(".pl-bar", { scaleX: 1, duration: LOAD, ease: "power2.inOut" }, 0.1)
+        .to(
+          progress,
+          {
+            v: 100,
+            duration: LOAD,
+            ease: "power2.inOut",
+            onUpdate: () => {
+              if (counter.current) counter.current.textContent = String(Math.round(progress.v)).padStart(3, "0");
+            },
+          },
+          0.1,
+        )
+        .fromTo(
+          ".pl-logo",
+          { clipPath: "circle(0% at 50% 50%)", scale: 1.4, rotate: -25 },
+          { clipPath: "circle(50% at 50% 50%)", scale: 1, rotate: 0, duration: 1.6 },
+          0.45,
+        )
+        // ---- exit ----
+        .addLabel("exit", LOAD + 0.35)
+        .to(".pl-logo-wrap", { scale: 0.6, autoAlpha: 0, duration: 0.6, ease: "power3.in" }, "exit")
+        .to(".pl-char", { yPercent: -120, stagger: 0.02, duration: 0.5, ease: "power3.in" }, "exit")
+        .to([".pl-meta", ".pl-cat"], { autoAlpha: 0, duration: 0.3 }, "exit")
+        .to(".pl-panel-royal.top", { yPercent: -100, duration: 1.2, ease: "expo.inOut" }, "exit+=0.45")
+        .to(".pl-panel-royal.bottom", { yPercent: 100, duration: 1.2, ease: "expo.inOut" }, "exit+=0.45")
+        .to(".pl-panel-gold.top", { yPercent: -100, duration: 1.2, ease: "expo.inOut" }, "exit+=0.6")
+        .to(".pl-panel-gold.bottom", { yPercent: 100, duration: 1.2, ease: "expo.inOut" }, "exit+=0.6")
+        .add(() => {
+          html.classList.remove("is-loading");
+          onComplete();
+        }, "exit+=0.85")
+        .set(root.current, { display: "none" });
+
+      return () => html.classList.remove("is-loading");
+    },
+    { scope: root },
+  );
+
+  return (
+    <div ref={root} className="fixed inset-0 z-50 overflow-hidden" aria-label="Loading Asif Book Store" role="status">
+      {/* Layered split curtains: gold underneath, royal on top */}
+      <div className="pl-panel-gold top absolute inset-x-0 top-0 h-1/2 bg-gold-400" />
+      <div className="pl-panel-gold bottom absolute inset-x-0 bottom-0 h-1/2 bg-gold-400" />
+      <div className="pl-panel-royal top absolute inset-x-0 top-0 h-1/2 bg-royal-800" />
+      <div className="pl-panel-royal bottom absolute inset-x-0 bottom-0 h-1/2 bg-royal-800" />
+
+      {/* Subtle radial glow, same feel as the logo's background */}
+      <div className="pl-meta absolute inset-0 bg-[radial-gradient(circle_at_50%_45%,rgba(10,91,224,.9),transparent_60%)]" />
+
+      <div className="relative flex h-full flex-col items-center justify-center gap-10 text-white">
+        <div className="pl-logo-wrap relative h-44 w-44 sm:h-56 sm:w-56">
+          <svg viewBox="0 0 200 200" className="pl-orbit absolute -inset-6 h-[calc(100%+3rem)] w-[calc(100%+3rem)]">
+            <circle cx="100" cy="100" r="96" fill="none" stroke="rgba(255,255,255,.12)" strokeWidth="1" />
+            <circle
+              className="pl-ring"
+              cx="100"
+              cy="100"
+              r="96"
+              fill="none"
+              stroke="#ffd21f"
+              strokeWidth="2"
+              strokeLinecap="round"
+              pathLength={1}
+              strokeDasharray="1"
+              strokeDashoffset="1"
+            />
+            <circle
+              className="pl-ring-gold"
+              cx="100"
+              cy="100"
+              r="88"
+              fill="none"
+              stroke="#f5b800"
+              strokeWidth="6"
+              strokeLinecap="round"
+              pathLength={1}
+              strokeDasharray="0.25 1"
+              strokeDashoffset="1"
+              opacity=".5"
+            />
+            <circle cx="100" cy="4" r="4" fill="#ffd21f" />
+          </svg>
+          <div className="pl-logo absolute inset-0 overflow-hidden rounded-full shadow-[0_0_80px_rgba(255,210,31,.35)]">
+            <Image src="/assets/images/logo.jpeg" alt="Asif Book Store logo" fill sizes="224px" priority className="object-cover" />
+          </div>
+        </div>
+
+        <h1 className="flex gap-4 text-5xl font-semibold tracking-tight uppercase sm:text-7xl">
+          {WORDS.map((w) => (
+            <span key={w} className="flex overflow-hidden pb-1">
+              {w.split("").map((c, i) => (
+                <span key={i} className="pl-char inline-block">
+                  {c}
+                </span>
+              ))}
+            </span>
+          ))}
+        </h1>
+
+        <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-[11px] tracking-[.3em] text-gold-300 uppercase">
+          {CATS.map((c) => (
+            <span key={c} className="pl-cat">
+              {c}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <div className="pl-meta absolute inset-x-6 bottom-8 flex items-end justify-between gap-6 text-white sm:inset-x-12">
+        <div className="text-[11px] leading-relaxed tracking-[.2em] uppercase opacity-70">
+          Authorized Dealer
+          <br />
+          The City School &amp; more
+        </div>
+        <div className="flex-1 self-center">
+          <div className="h-px w-full bg-white/15">
+            <div className="pl-bar h-px origin-left scale-x-0 bg-gold-400" />
+          </div>
+        </div>
+        <span className="font-heading text-6xl leading-none font-semibold tabular-nums sm:text-8xl">
+          <span ref={counter}>000</span>
+          <span className="text-gold-400">%</span>
+        </span>
+      </div>
+    </div>
+  );
+}

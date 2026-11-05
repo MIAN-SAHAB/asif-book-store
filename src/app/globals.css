@@ -1,0 +1,194 @@
+@import "tailwindcss";
+
+/*
+ * Asif Book Store palette — extracted from public/assets/images/logo.jpeg
+ *   Primary   : royal cobalt blue  (#0050D8 core → #00227A deep edge)
+ *   Secondary : polished gold      (#FFD21F highlight → #F5B800 body)
+ *   Accent    : amber bevel        (#E08A00 shadow edge of the gold)
+ */
+@theme inline {
+  --color-ink: #050d2b;
+  --color-cream: #fbf8f0;
+  --color-paper: #f4efe2;
+
+  --color-royal-50: #eef3ff;
+  --color-royal-100: #dce7ff;
+  --color-royal-200: #b5ccff;
+  --color-royal-300: #7fa6ff;
+  --color-royal-400: #3f7bf5;
+  --color-royal-500: #0a5be0;
+  --color-royal-600: #0050d8;
+  --color-royal-700: #0039b0;
+  --color-royal-800: #00227a;
+  --color-royal-900: #00175a;
+  --color-royal-950: #000e3a;
+
+  --color-gold-50: #fffbea;
+  --color-gold-100: #fff3c2;
+  --color-gold-200: #ffe88a;
+  --color-gold-300: #ffdc4d;
+  --color-gold-400: #ffd21f;
+  --color-gold-500: #f5b800;
+  --color-gold-600: #e08a00;
+  --color-gold-700: #b86a00;
+
+  --font-heading: var(--font-neue), "Helvetica Neue", Arial, sans-serif;
+  --font-body: var(--font-nevera), ui-sans-serif, system-ui, sans-serif;
+
+  --ease-expo: cubic-bezier(0.19, 1, 0.22, 1);
+
+  --animate-fade-up: fade-up 0.7s var(--ease-expo) both;
+  --animate-bump: bump 0.45s var(--ease-expo);
+  --animate-marquee: marquee 40s linear infinite;
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(28px) scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes bump {
+    0% {
+      transform: scale(1);
+    }
+    40% {
+      transform: scale(1.35);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+}
+
+:root {
+  --background: var(--color-cream);
+  --foreground: var(--color-ink);
+}
+
+html {
+  scrollbar-gutter: stable;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html.is-loading,
+html.is-locked {
+  overflow: hidden;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4,
+.font-heading {
+  font-family: var(--font-heading);
+  letter-spacing: -0.02em;
+}
+
+::selection {
+  background: var(--color-gold-400);
+  color: var(--color-royal-900);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-gold-500);
+  outline-offset: 3px;
+}
+
+/* ---------- Utilities ---------- */
+@utility text-stroke {
+  -webkit-text-stroke: 1.5px currentColor;
+  color: transparent;
+}
+
+@utility text-stroke-gold {
+  -webkit-text-stroke: 1.5px var(--color-gold-400);
+  color: transparent;
+}
+
+@utility glass {
+  background: rgb(255 255 255 / 0.62);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+}
+
+@utility glass-dark {
+  background: rgb(5 13 43 / 0.55);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+}
+
+@utility bg-grain {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
+}
+
+@utility text-gold-gradient {
+  background: linear-gradient(
+    180deg,
+    var(--color-gold-200) 0%,
+    var(--color-gold-400) 45%,
+    var(--color-gold-600) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Glow border used by the tech bento grid (mouse position fed via CSS vars) */
+.glow-card {
+  --mx: 50%;
+  --my: 50%;
+  background:
+    radial-gradient(
+      420px circle at var(--mx) var(--my),
+      rgb(255 210 31 / 0.85),
+      rgb(10 91 224 / 0.35) 35%,
+      transparent 60%
+    ),
+    rgb(255 255 255 / 0.08);
+}
+.glow-card-inner::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    500px circle at var(--mx) var(--my),
+    rgb(255 210 31 / 0.08),
+    transparent 45%
+  );
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+.glow-card:hover .glow-card-inner::before {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
