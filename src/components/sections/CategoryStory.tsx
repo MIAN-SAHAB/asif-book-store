@@ -192,7 +192,7 @@ export default function CategoryStory() {
       });
 
       // Slide 1 draws in as the section arrives.
-      tl.to(slides[0].querySelectorAll(".story-path"), { strokeDashoffset: 0, stagger: 0.02, duration: 0.8 }, 0)
+      tl.to(slides[0].querySelectorAll(".story-path"), { strokeDashoffset: 0, autoRound: false, stagger: 0.02, duration: 0.8 }, 0)
         .fromTo(slides[0].querySelector(".story-word"), { xPercent: 20 }, { xPercent: -20, duration: 1 }, 0);
 
       for (let i = 1; i < slides.length; i++) {
@@ -208,7 +208,7 @@ export default function CategoryStory() {
           .to(prev.querySelector(".story-content"), { yPercent: -25, autoAlpha: 0, duration: 0.4 }, at - 0.15)
           .to(prev.querySelector(".story-art"), { scale: 0.8, rotate: -15, autoAlpha: 0, duration: 0.5 }, at - 0.15)
           .from(cur.querySelectorAll(".story-reveal"), { y: 90, autoAlpha: 0, stagger: 0.06, duration: 0.4 }, at + 0.15)
-          .to(cur.querySelectorAll(".story-path"), { strokeDashoffset: 0, stagger: 0.015, duration: 0.7 }, at + 0.05)
+          .to(cur.querySelectorAll(".story-path"), { strokeDashoffset: 0, autoRound: false, stagger: 0.015, duration: 0.7 }, at + 0.05)
           .fromTo(cur.querySelector(".story-art"), { rotate: 25, scale: 1.2 }, { rotate: 0, scale: 1, duration: 0.8 }, at - 0.1)
           .fromTo(cur.querySelector(".story-word"), { xPercent: 30 }, { xPercent: -20, duration: 1 }, at - 0.15);
       }

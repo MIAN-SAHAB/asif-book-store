@@ -88,7 +88,7 @@ export default function Footer() {
                   placeholder="you@email.com"
                   className="h-14 flex-1 rounded-full bg-white/70 px-6 text-royal-900 outline-none placeholder:text-royal-900/40 focus:bg-white"
                 />
-                <MagneticButton type="submit" variant="royal" strength={0.2}>
+                <MagneticButton type="submit" variant="royal">
                   Subscribe <Send size={15} />
                 </MagneticButton>
               </form>

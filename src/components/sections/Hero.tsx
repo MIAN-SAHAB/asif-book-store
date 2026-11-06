@@ -8,6 +8,8 @@ import { CATEGORY_META, type Category } from "@/lib/products";
 import { formatPrice } from "@/lib/format";
 import MagneticButton from "@/components/ui/MagneticButton";
 import { TONE_CLASSES } from "@/components/ui/ProductAvatar";
+import { PRELOADER_REVEAL_DELAY } from "@/components/sections/Preloader";
+import DotField from "@/components/ui/DotField";
 
 const LINES = [
   { text: "Everything", className: "" },
@@ -22,11 +24,11 @@ const FLOATERS: {
   rot: number;
   tone: keyof typeof TONE_CLASSES;
 }[] = [
-  { cat: "books", pos: "left-[-4%] top-[6%]", depth: 0.9, rot: -10, tone: "royal" },
-  { cat: "uniforms", pos: "right-[-2%] top-[2%]", depth: 0.5, rot: 9, tone: "gold" },
-  { cat: "gadgets", pos: "left-[-8%] bottom-[8%]", depth: 0.7, rot: 7, tone: "ink" },
-  { cat: "watches", pos: "right-[-6%] bottom-[2%]", depth: 1.1, rot: -8, tone: "plum" },
-];
+    { cat: "books", pos: "left-[-4%] top-[6%]", depth: 0.9, rot: -10, tone: "royal" },
+    { cat: "uniforms", pos: "right-[-2%] top-[2%]", depth: 0.5, rot: 9, tone: "gold" },
+    { cat: "gadgets", pos: "left-[-8%] bottom-[8%]", depth: 0.7, rot: 7, tone: "ink" },
+    { cat: "watches", pos: "right-[-6%] bottom-[2%]", depth: 1.1, rot: -8, tone: "plum" },
+  ];
 
 const RING_TEXT = "AUTHORIZED DEALER • THE CITY SCHOOL • BOOKS • UNIFORMS • GADGETS • WATCHES • ";
 
@@ -43,8 +45,9 @@ export default function Hero({ loaded }: { loaded: boolean }) {
         return;
       }
 
-      const tl = gsap.timeline({ defaults: { ease: "expo.out" } });
-      tl.to(".hero-grid-line", { strokeDashoffset: 0, duration: 2.2, stagger: 0.03, ease: "power2.inOut" }, 0)
+      // Wait for the preloader curtains to open so the intro plays in view.
+      const tl = gsap.timeline({ delay: PRELOADER_REVEAL_DELAY, defaults: { ease: "expo.out" } });
+      tl.to(".hero-line", { strokeDashoffset: 0, autoRound: false, duration: 2.2, ease: "power2.inOut" }, 0)
         .to(".hero-char", { yPercent: 0, rotate: 0, duration: 1.3, stagger: 0.025 }, 0.1)
         .to(".hero-logo", { scale: 1, autoAlpha: 1, rotate: 0, duration: 1.6 }, 0.3)
         .fromTo(
@@ -82,7 +85,7 @@ export default function Hero({ loaded }: { loaded: boolean }) {
     const ny = (e.clientY - r.top) / r.height - 0.5;
     gsap.utils.selector(section)(".hero-mouse").forEach((el: HTMLElement) => {
       const d = Number(el.dataset.depth ?? 1);
-      gsap.to(el, { x: nx * 60 * d, y: ny * 50 * d, rotateY: nx * 18, rotateX: -ny * 18, duration: 1, ease: "power3.out" });
+      gsap.to(el, { x: nx * 60 * d, y: ny * 50 * d, rotateY: nx * 18, rotateX: -ny * 18, duration: 1, ease: "power3.out", overwrite: "auto" });
     });
   };
 
@@ -93,45 +96,20 @@ export default function Hero({ loaded }: { loaded: boolean }) {
       onMouseMove={onMouseMove}
       className="relative isolate min-h-[100svh] overflow-hidden bg-cream pt-32 pb-20 lg:pt-36"
     >
-      {/* Background SVG grid that draws in */}
+      {/* Interactive dot-paper background: ripples in on load, reacts to the cursor, clicks send a wave. */}
+      <div className="hero-grid absolute inset-0 -z-10">
+        <DotField active={loaded} delay={PRELOADER_REVEAL_DELAY} />
+      </div>
+
+      {/* Gold accent stroke that draws in */}
       <svg
         className="hero-grid pointer-events-none absolute inset-0 -z-10 h-full w-full"
         viewBox="0 0 1440 900"
         preserveAspectRatio="xMidYMid slice"
         aria-hidden
       >
-        {Array.from({ length: 13 }, (_, i) => (
-          <line
-            key={`v${i}`}
-            className="hero-grid-line"
-            x1={i * 120}
-            y1="0"
-            x2={i * 120}
-            y2="900"
-            stroke="#00227a"
-            strokeOpacity=".08"
-            pathLength={1}
-            strokeDasharray="1"
-            strokeDashoffset="1"
-          />
-        ))}
-        {Array.from({ length: 8 }, (_, i) => (
-          <line
-            key={`h${i}`}
-            className="hero-grid-line"
-            x1="0"
-            y1={i * 120}
-            x2="1440"
-            y2={i * 120}
-            stroke="#00227a"
-            strokeOpacity=".08"
-            pathLength={1}
-            strokeDasharray="1"
-            strokeDashoffset="1"
-          />
-        ))}
         <path
-          className="hero-grid-line"
+          className="hero-line"
           d="M-20 760 C 300 620, 520 880, 820 700 S 1300 520, 1480 640"
           fill="none"
           stroke="#ffd21f"

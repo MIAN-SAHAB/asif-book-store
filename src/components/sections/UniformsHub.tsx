@@ -32,7 +32,7 @@ export default function UniformsHub() {
   useGSAP(
     () => {
       const st = { trigger: root.current, start: "top 70%", end: "bottom bottom", scrub: 0.6 };
-      gsap.to(".u-shirt-path", { strokeDashoffset: 0, stagger: 0.05, ease: "none", scrollTrigger: st });
+      gsap.to(".u-shirt-path", { strokeDashoffset: 0, autoRound: false, stagger: 0.05, ease: "none", scrollTrigger: st });
       gsap.fromTo(".u-progress", { scaleY: 0 }, { scaleY: 1, ease: "none", scrollTrigger: { ...st, start: "top top" } });
       gsap.fromTo(
         ".u-hanger",

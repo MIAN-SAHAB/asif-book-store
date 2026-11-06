@@ -4,6 +4,13 @@ import Image from "next/image";
 import { useRef } from "react";
 import { gsap, useGSAP } from "@/lib/gsap";
 
+/**
+ * Seconds between `onComplete` (the handoff) and the moment the curtains are
+ * far enough open to show the page. Hero/Navbar delay their intros by this so
+ * they still play in view.
+ */
+export const PRELOADER_REVEAL_DELAY = 0.55;
+
 const WORDS = ["Asif", "Book", "Store"];
 const CATS = ["Books", "Uniforms", "Gadgets", "Watches"];
 
@@ -27,10 +34,12 @@ export default function Preloader({ onComplete }: { onComplete: () => void }) {
       const LOAD = 2.4;
       const tl = gsap.timeline({ defaults: { ease: "expo.out" } });
 
-      tl.from(".pl-char", { yPercent: 120, rotate: 8, stagger: 0.035, duration: 1.1 }, 0.1)
-        .from(".pl-cat", { y: 14, autoAlpha: 0, stagger: 0.12, duration: 0.8 }, 0.5)
-        .to(".pl-ring", { strokeDashoffset: 0, duration: LOAD, ease: "power2.inOut" }, 0.1)
-        .to(".pl-ring-gold", { strokeDashoffset: 0.75, duration: LOAD, ease: "power3.inOut" }, 0.2)
+      // Initial ("from") states live in the Tailwind classes below so the
+      // first paint already matches frame 0 — no flash of the final state.
+      tl.to(".pl-char", { y: 0, rotate: 0, stagger: 0.035, duration: 1.1 }, 0.1)
+        .to(".pl-cat", { y: 0, autoAlpha: 1, stagger: 0.12, duration: 0.8 }, 0.5)
+        .to(".pl-ring", { strokeDashoffset: 0, autoRound: false, duration: LOAD, ease: "power2.inOut" }, 0.1)
+        .to(".pl-ring-gold", { strokeDashoffset: 0.75, autoRound: false, duration: LOAD, ease: "power3.inOut" }, 0.2)
         .to(".pl-orbit", { rotate: 300, duration: LOAD + 0.6, ease: "power2.inOut" }, 0)
         .to(".pl-bar", { scaleX: 1, duration: LOAD, ease: "power2.inOut" }, 0.1)
         .to(
@@ -45,25 +54,26 @@ export default function Preloader({ onComplete }: { onComplete: () => void }) {
           },
           0.1,
         )
-        .fromTo(
-          ".pl-logo",
-          { clipPath: "circle(0% at 50% 50%)", scale: 1.4, rotate: -25 },
-          { clipPath: "circle(50% at 50% 50%)", scale: 1, rotate: 0, duration: 1.6 },
-          0.45,
-        )
+        .to(".pl-logo", { clipPath: "circle(50%)", scale: 1, rotate: 0, duration: 1.6 }, 0.45)
         // ---- exit ----
         .addLabel("exit", LOAD + 0.35)
-        .to(".pl-logo-wrap", { scale: 0.6, autoAlpha: 0, duration: 0.6, ease: "power3.in" }, "exit")
-        .to(".pl-char", { yPercent: -120, stagger: 0.02, duration: 0.5, ease: "power3.in" }, "exit")
+        .to(".pl-logo-wrap", { scale: 0.6, autoAlpha: 0, duration: 0.55, ease: "power3.in" }, "exit")
+        .to(".pl-char", { yPercent: -120, stagger: 0.015, duration: 0.45, ease: "power3.in" }, "exit")
         .to([".pl-meta", ".pl-cat"], { autoAlpha: 0, duration: 0.3 }, "exit")
-        .to(".pl-panel-royal.top", { yPercent: -100, duration: 1.2, ease: "expo.inOut" }, "exit+=0.45")
-        .to(".pl-panel-royal.bottom", { yPercent: 100, duration: 1.2, ease: "expo.inOut" }, "exit+=0.45")
-        .to(".pl-panel-gold.top", { yPercent: -100, duration: 1.2, ease: "expo.inOut" }, "exit+=0.6")
-        .to(".pl-panel-gold.bottom", { yPercent: 100, duration: 1.2, ease: "expo.inOut" }, "exit+=0.6")
+        // Handoff while the curtains are still closed and nothing is moving:
+        // unlocking scroll, the React re-render and ScrollTrigger setup/refresh
+        // all cost main-thread time. Any frames they drop land on a static
+        // screen instead of in the middle of the curtain motion.
         .add(() => {
           html.classList.remove("is-loading");
           onComplete();
-        }, "exit+=0.85")
+        }, "exit+=0.6")
+        // Short still beat so the handoff work is finished before anything moves.
+        .addLabel("reveal", "exit+=0.75")
+        .to(".pl-panel-royal.top", { yPercent: -100, duration: 1.2, ease: "expo.inOut" }, "reveal")
+        .to(".pl-panel-royal.bottom", { yPercent: 100, duration: 1.2, ease: "expo.inOut" }, "reveal")
+        .to(".pl-panel-gold.top", { yPercent: -100, duration: 1.2, ease: "expo.inOut" }, "reveal+=0.15")
+        .to(".pl-panel-gold.bottom", { yPercent: 100, duration: 1.2, ease: "expo.inOut" }, "reveal+=0.15")
         .set(root.current, { display: "none" });
 
       return () => html.classList.remove("is-loading");
@@ -74,16 +84,16 @@ export default function Preloader({ onComplete }: { onComplete: () => void }) {
   return (
     <div ref={root} className="fixed inset-0 z-50 overflow-hidden" aria-label="Loading Asif Book Store" role="status">
       {/* Layered split curtains: gold underneath, royal on top */}
-      <div className="pl-panel-gold top absolute inset-x-0 top-0 h-1/2 bg-gold-400" />
-      <div className="pl-panel-gold bottom absolute inset-x-0 bottom-0 h-1/2 bg-gold-400" />
-      <div className="pl-panel-royal top absolute inset-x-0 top-0 h-1/2 bg-royal-800" />
-      <div className="pl-panel-royal bottom absolute inset-x-0 bottom-0 h-1/2 bg-royal-800" />
+      <div className="pl-panel-gold top absolute will-change-transform inset-x-0 top-0 h-1/2 bg-gold-400" />
+      <div className="pl-panel-gold bottom absolute will-change-transform inset-x-0 bottom-0 h-1/2 bg-gold-400" />
+      <div className="pl-panel-royal top absolute will-change-transform inset-x-0 top-0 h-1/2 bg-royal-800" />
+      <div className="pl-panel-royal bottom absolute will-change-transform inset-x-0 bottom-0 h-1/2 bg-royal-800" />
 
       {/* Subtle radial glow, same feel as the logo's background */}
-      <div className="pl-meta absolute inset-0 bg-[radial-gradient(circle_at_50%_45%,rgba(10,91,224,.9),transparent_60%)]" />
+      <div className="pl-meta absolute inset-0 will-change-[opacity] bg-[radial-gradient(circle_at_50%_45%,rgba(10,91,224,.9),transparent_60%)]" />
 
       <div className="relative flex h-full flex-col items-center justify-center gap-10 text-white">
-        <div className="pl-logo-wrap relative h-44 w-44 sm:h-56 sm:w-56">
+        <div className="pl-logo-wrap relative will-change-[transform,opacity] h-44 w-44 sm:h-56 sm:w-56">
           <svg viewBox="0 0 200 200" className="pl-orbit absolute -inset-6 h-[calc(100%+3rem)] w-[calc(100%+3rem)]">
             <circle cx="100" cy="100" r="96" fill="none" stroke="rgba(255,255,255,.12)" strokeWidth="1" />
             <circle
@@ -115,7 +125,7 @@ export default function Preloader({ onComplete }: { onComplete: () => void }) {
             />
             <circle cx="100" cy="4" r="4" fill="#ffd21f" />
           </svg>
-          <div className="pl-logo absolute inset-0 overflow-hidden rounded-full shadow-[0_0_80px_rgba(255,210,31,.35)]">
+          <div className="pl-logo absolute inset-0 overflow-hidden rounded-full shadow-[0_0_80px_rgba(255,210,31,.35)] [clip-path:circle(0%)] [transform:scale(1.4)_rotate(-25deg)]">
             <Image src="/assets/images/logo.jpeg" alt="Asif Book Store logo" fill sizes="224px" priority className="object-cover" />
           </div>
         </div>
@@ -124,7 +134,7 @@ export default function Preloader({ onComplete }: { onComplete: () => void }) {
           {WORDS.map((w) => (
             <span key={w} className="flex overflow-hidden pb-1">
               {w.split("").map((c, i) => (
-                <span key={i} className="pl-char inline-block">
+                <span key={i} className="pl-char inline-block [transform:translateY(120%)_rotate(8deg)]">
                   {c}
                 </span>
               ))}
@@ -134,7 +144,7 @@ export default function Preloader({ onComplete }: { onComplete: () => void }) {
 
         <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-[11px] tracking-[.3em] text-gold-300 uppercase">
           {CATS.map((c) => (
-            <span key={c} className="pl-cat">
+            <span key={c} className="pl-cat invisible inline-block opacity-0 [transform:translateY(14px)]">
               {c}
             </span>
           ))}

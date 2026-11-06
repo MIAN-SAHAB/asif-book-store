@@ -34,9 +34,9 @@ export default function BrandMetrics() {
         scrollTrigger: { trigger: root.current, start: "top 75%", end: "bottom bottom", scrub: 0.8 },
       });
 
-      tl.to(".metric-path", { strokeDashoffset: 0, duration: 1 }, 0).to(
+      tl.to(".metric-path", { strokeDashoffset: 0, autoRound: false, duration: 1 }, 0).to(
         ".metric-path-glow",
-        { strokeDashoffset: 0, duration: 1 },
+        { strokeDashoffset: 0, autoRound: false, duration: 1 },
         0,
       );
 

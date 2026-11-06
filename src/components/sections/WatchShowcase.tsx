@@ -44,7 +44,7 @@ export default function WatchShowcase() {
 
       // Draw the dial as the section arrives.
       gsap.to(".wd-draw", {
-        strokeDashoffset: 0,
+        strokeDashoffset: 0, autoRound: false,
         stagger: 0.05,
         ease: "none",
         scrollTrigger: { trigger: root.current, start: "top 90%", end: "top top", scrub: 0.6 },

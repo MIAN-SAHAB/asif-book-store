@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ScrollTrigger } from "@/lib/gsap";
 import { CartProvider } from "@/components/cart/CartContext";
 import CartDrawer from "@/components/cart/CartDrawer";
@@ -47,12 +47,11 @@ export default function HomeClient() {
     if (loaded) ScrollTrigger.refresh();
   }, [loaded]);
 
-  return (
-    <CartProvider>
-      <Preloader onComplete={onLoaded} />
-      <Navbar loaded={loaded} />
-      <main ref={mainRef} className="overflow-x-clip">
-        <Hero loaded={loaded} />
+  // Only Navbar and Hero depend on `loaded`. Keeping the rest as stable
+  // elements stops the preloader handoff from re-rendering every section.
+  const sections = useMemo(
+    () => (
+      <>
         <SchoolPartners />
         <CategoryStory />
         <BooksEmporium />
@@ -62,9 +61,29 @@ export default function HomeClient() {
         <WatchShowcase />
         <BundleBuilder />
         <Reviews />
+      </>
+    ),
+    [],
+  );
+  const tail = useMemo(
+    () => (
+      <>
+        <Footer />
+        <CartDrawer />
+      </>
+    ),
+    [],
+  );
+
+  return (
+    <CartProvider>
+      <Preloader onComplete={onLoaded} />
+      <Navbar loaded={loaded} />
+      <main ref={mainRef} className="overflow-x-clip">
+        <Hero loaded={loaded} />
+        {sections}
       </main>
-      <Footer />
-      <CartDrawer />
+      {tail}
     </CartProvider>
   );
 }

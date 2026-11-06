@@ -48,7 +48,7 @@ export default function BooksEmporium() {
           p,
           { strokeDashoffset: 1, fillOpacity: 0 },
           {
-            strokeDashoffset: 0,
+            strokeDashoffset: 0, autoRound: false,
             fillOpacity: 1,
             ease: "none",
             scrollTrigger: { trigger: root.current, start: `top ${85 - i * 6}%`, end: "top 15%", scrub: 0.6 },

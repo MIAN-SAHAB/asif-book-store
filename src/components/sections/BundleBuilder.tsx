@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Check, Gift, Percent, ShoppingBag } from "lucide-react";
 import { gsap, useGSAP } from "@/lib/gsap";
 import { BUNDLE_OPTIONS, BUNDLE_TIERS, CATEGORY_META, type Category, type Product } from "@/lib/products";
@@ -19,6 +19,48 @@ export default function BundleBuilder() {
   const shown = useRef({ v: 0 });
   const [picks, setPicks] = useState<Partial<Record<Category, Product>>>({});
   const { addMany } = useCart();
+  const colRef = useRef<HTMLDivElement>(null);
+  const iconRefs = useRef<(HTMLSpanElement | null)[]>([]);
+  const [ribbon, setRibbon] = useState({ w: 1, h: 1, d: "" });
+
+  // Build the ribbon through the icons' centres. Offsets (not getBoundingClientRect)
+  // ignore the scroll-in transforms on .bb-step, so it measures the resting layout.
+  useEffect(() => {
+    const col = colRef.current;
+    if (!col) return;
+
+    const offsetIn = (el: HTMLElement) => {
+      let x = 0;
+      let y = 0;
+      let node: HTMLElement | null = el;
+      while (node && node !== col) {
+        x += node.offsetLeft;
+        y += node.offsetTop;
+        node = node.offsetParent as HTMLElement | null;
+      }
+      return { x: x + el.offsetWidth / 2, y: y + el.offsetHeight / 2 };
+    };
+
+    const build = () => {
+      const pts = iconRefs.current.filter((el): el is HTMLSpanElement => Boolean(el)).map(offsetIn);
+      if (pts.length < 2) return;
+      const AMP = 22; // sideways swing between icons
+      let d = `M${pts[0].x} ${pts[0].y}`;
+      for (let i = 1; i < pts.length; i++) {
+        const a = pts[i - 1];
+        const b = pts[i];
+        const dy = b.y - a.y;
+        const s = i % 2 ? 1 : -1;
+        d += ` C${a.x + AMP * s} ${a.y + dy / 3}, ${b.x + AMP * s} ${b.y - dy / 3}, ${b.x} ${b.y}`;
+      }
+      setRibbon({ w: col.offsetWidth, h: col.offsetHeight, d });
+    };
+
+    build();
+    const ro = new ResizeObserver(build);
+    ro.observe(col);
+    return () => ro.disconnect();
+  }, []);
 
   const chosen = STEPS.map((c) => picks[c]).filter((p): p is Product => Boolean(p));
   const subtotal = chosen.reduce((n, p) => n + p.price, 0);
@@ -29,7 +71,7 @@ export default function BundleBuilder() {
   useGSAP(
     () => {
       gsap.to(".bb-ribbon", {
-        strokeDashoffset: 0,
+        strokeDashoffset: 0, autoRound: false,
         ease: "none",
         scrollTrigger: { trigger: root.current, start: "top 70%", end: "bottom 80%", scrub: 0.8 },
       });
@@ -118,12 +160,16 @@ export default function BundleBuilder() {
         </div>
 
         <div className="mt-16 grid gap-10 lg:grid-cols-12">
-          <div className="relative lg:col-span-8">
-            {/* Connecting ribbon down the steps */}
-            <svg className="pointer-events-none absolute top-0 left-6 hidden h-full w-12 md:block" viewBox="0 0 48 1000" preserveAspectRatio="none" aria-hidden>
+          <div ref={colRef} className="relative lg:col-span-8">
+            {/* Connecting ribbon: runs behind the step icons, built from their measured centres */}
+            <svg
+              className="pointer-events-none absolute inset-0 hidden h-full w-full overflow-visible md:block"
+              viewBox={`0 0 ${ribbon.w} ${ribbon.h}`}
+              aria-hidden
+            >
               <path
                 className="bb-ribbon"
-                d="M24 0 C 48 120, 0 240, 24 360 S 48 600, 24 720 S 0 900, 24 1000"
+                d={ribbon.d}
                 fill="none"
                 stroke="#f5b800"
                 strokeWidth="4"
@@ -140,9 +186,13 @@ export default function BundleBuilder() {
                 const Icon = Meta.icon;
                 const sel = picks[c];
                 return (
-                  <div key={c} className="bb-step md:pl-24">
+                  <div key={c} className="bb-step md:relative md:pl-24">
                     <div className="mb-4 flex items-center gap-3">
-                      <span className={`relative z-10 grid h-12 w-12 place-items-center rounded-full transition-colors md:absolute md:left-6 ${sel ? "bg-royal-800 text-gold-400" : "bg-white text-royal-800 ring-1 ring-ink/10"}`}>
+                      <span
+                        ref={(el) => {
+                          iconRefs.current[i] = el;
+                        }}
+                        className={`relative z-10 grid h-12 w-12 place-items-center rounded-full transition-colors md:absolute md:left-6 ${sel ? "bg-royal-800 text-gold-400" : "bg-white text-royal-800 ring-1 ring-ink/10"}`}>
                         {sel ? <Check size={20} /> : <Icon size={20} />}
                       </span>
                       <div>
@@ -226,7 +276,7 @@ export default function BundleBuilder() {
               </div>
 
               <div className="mt-6">
-                <MagneticButton onClick={addBundle} disabled={chosen.length === 0} variant="gold" className="w-full" fullWidth strength={0.2}>
+                <MagneticButton onClick={addBundle} disabled={chosen.length === 0} variant="gold" className="w-full" fullWidth>
                   <ShoppingBag size={16} /> Add bundle to cart
                 </MagneticButton>
               </div>

@@ -33,7 +33,7 @@ export default function SchoolPartners() {
       tl.fromTo(".sp-row-a", { xPercent: 0 }, { xPercent: -50, duration: 1 }, 0)
         .fromTo(".sp-row-b", { xPercent: -50 }, { xPercent: 0, duration: 1 }, 0)
         .fromTo(".sp-feature", { scale: 0.55, rotate: -8, autoAlpha: 0 }, { scale: 1, rotate: 0, autoAlpha: 1, duration: 0.35 }, 0.05)
-        .to(".sp-crest-path", { strokeDashoffset: 0, duration: 0.45, stagger: 0.03 }, 0.1)
+        .to(".sp-crest-path", { strokeDashoffset: 0, autoRound: false, duration: 0.45, stagger: 0.03 }, 0.1)
         .fromTo(".sp-badge", { y: 120, autoAlpha: 0 }, { y: 0, autoAlpha: 1, stagger: 0.06, duration: 0.25 }, 0.25)
         .to(".sp-feature", { yPercent: -12, duration: 0.4 }, 0.6)
         .to(".sp-progress", { scaleX: 1, duration: 1 }, 0);
@@ -225,7 +225,8 @@ function KitSelector() {
   };
 
   return (
-    <div ref={root} className="relative overflow-hidden bg-cream py-24 text-ink sm:py-32">
+    <div ref={root} className="relative overflow-hidden bg-cream pt-52 pb-24 text-ink sm:pt-56 sm:pb-32">
+      {/* Curve hangs 160px into the section (-top-40 + h-80); top padding keeps the copy clear of it. */}
       <div className="pointer-events-none absolute -top-40 left-1/2 h-80 w-[140%] -translate-x-1/2 rounded-[50%] bg-royal-800" />
       <div className="relative mx-auto grid max-w-7xl gap-12 px-5 sm:px-8 lg:grid-cols-12">
         <div className="lg:col-span-6">

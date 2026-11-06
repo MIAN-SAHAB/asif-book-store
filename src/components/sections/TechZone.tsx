@@ -98,7 +98,7 @@ export default function TechZone() {
   useGSAP(
     () => {
       gsap.to(".tz-circuit", {
-        strokeDashoffset: 0,
+        strokeDashoffset: 0, autoRound: false,
         stagger: 0.1,
         ease: "none",
         scrollTrigger: { trigger: root.current, start: "top 80%", end: "bottom 60%", scrub: 0.8 },

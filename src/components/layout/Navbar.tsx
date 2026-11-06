@@ -6,6 +6,7 @@ import { Menu, Search, ShoppingBag, X } from "lucide-react";
 import { gsap, ScrollTrigger, useGSAP } from "@/lib/gsap";
 import { useCart } from "@/components/cart/CartContext";
 import SearchModal from "./SearchModal";
+import { PRELOADER_REVEAL_DELAY } from "@/components/sections/Preloader";
 
 const LINKS = [
   { href: "#books", label: "Books" },
@@ -29,7 +30,7 @@ export default function Navbar({ loaded }: { loaded: boolean }) {
         gsap.set(ref.current, { yPercent: -160, autoAlpha: 0 });
         return;
       }
-      gsap.to(ref.current, { yPercent: 0, autoAlpha: 1, duration: 1.2, ease: "expo.out", delay: 0.5 });
+      gsap.to(ref.current, { yPercent: 0, autoAlpha: 1, duration: 1.2, ease: "expo.out", delay: PRELOADER_REVEAL_DELAY + 0.5 });
 
       // Hide on scroll down, reveal on scroll up (scroll-driven).
       ScrollTrigger.create({
@@ -88,7 +89,7 @@ export default function Navbar({ loaded }: { loaded: boolean }) {
                   href={l.href}
                   className="group relative block overflow-hidden rounded-full px-4 py-2 text-[13px] text-royal-900 transition hover:bg-royal-800 hover:text-white"
                 >
-                  <span className="block transition-transform duration-500 ease-[var(--ease-expo)] group-hover:-translate-y-full">
+                  <span className="block transition-transform duration-500 ease-[var(--ease-expo)] group-hover:-translate-y-[110%]">
                     {l.label}
                   </span>
                   <span className="absolute inset-0 flex translate-y-full items-center justify-center text-gold-300 transition-transform duration-500 ease-[var(--ease-expo)] group-hover:translate-y-0">
