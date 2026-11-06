@@ -173,7 +173,7 @@ export default function Footer() {
       <div className="border-t border-white/10">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 px-5 py-6 text-xs text-white/50 sm:flex-row sm:px-8">
           <p>© 2026 Asif Book Store. All rights reserved.</p>
-          <p>Prices in PKR · Demo storefront</p>
+          <p>Developed by <a className="text-gold-gradient hover:text-white" href="http://www.hamzadaniyal.com" rel="noopener noreferrer" target="_blank" >Hamza Daniyal</a></p>
         </div>
       </div>
     </footer>

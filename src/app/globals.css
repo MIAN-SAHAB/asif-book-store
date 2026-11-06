@@ -79,6 +79,12 @@ html.is-locked {
   overflow: hidden;
 }
 
+/* Modals cover the page with a fixed backdrop, which can't paint into a reserved
+   gutter, so drop it while locked instead of leaving a blank strip on the right. */
+html.is-locked {
+  scrollbar-gutter: auto;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);

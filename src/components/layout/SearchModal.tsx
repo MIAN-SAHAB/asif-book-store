@@ -40,7 +40,7 @@ export default function SearchModal({ open, onClose }: { open: boolean; onClose:
     <div className="fixed inset-0 z-[65] flex items-start justify-center px-4 pt-[10vh]" role="dialog" aria-label="Search products">
       <div className="absolute inset-0 animate-[fade-up_.4s_ease_both] bg-royal-950/60 backdrop-blur-md" onClick={onClose} />
       <div className="relative flex max-h-[78vh] w-full max-w-2xl animate-fade-up flex-col overflow-hidden rounded-3xl bg-cream shadow-2xl">
-        <div className="flex items-center gap-3 border-b border-ink/10 px-5 py-4">
+        <div className="flex shrink-0 items-center gap-3 border-b border-ink/10 px-5 py-4">
           <Search className="text-royal-700" size={20} />
           <input
             autoFocus
@@ -53,7 +53,8 @@ export default function SearchModal({ open, onClose }: { open: boolean; onClose:
             <X size={18} />
           </button>
         </div>
-        <div className="no-scrollbar flex gap-2 overflow-x-auto border-b border-ink/10 px-5 py-3">
+        {/* shrink-0: as a scroll container this row may otherwise be squashed by the long list and clip the pills */}
+        <div className="no-scrollbar flex shrink-0 gap-2 overflow-x-auto border-b border-ink/10 px-5 py-3">
           {(["all", "books", "uniforms", "gadgets", "watches"] as const).map((c) => (
             <button
               key={c}
@@ -65,7 +66,7 @@ export default function SearchModal({ open, onClose }: { open: boolean; onClose:
           ))}
         </div>
         {!query && (
-          <div className="flex flex-wrap items-center gap-2 px-5 pt-4 text-xs">
+          <div className="flex shrink-0 flex-wrap items-center gap-2 px-5 pt-4 text-xs">
             <span className="opacity-50">Trending:</span>
             {QUICK.map((q) => (
               <button key={q} onClick={() => setQuery(q)} className="rounded-full border border-ink/10 px-3 py-1 hover:border-royal-600 hover:text-royal-700">
@@ -74,7 +75,8 @@ export default function SearchModal({ open, onClose }: { open: boolean; onClose:
             ))}
           </div>
         )}
-        <ul className="flex-1 overflow-y-auto p-3">
+        {/* Thin scrollbar + smaller right padding keeps the right edge as tight as the left. */}
+        <ul className="min-h-0 flex-1 overflow-y-auto py-3 pr-1 pl-3 [scrollbar-color:rgba(0,34,122,.25)_transparent] [scrollbar-width:thin]">
           {results.length === 0 && <li className="p-8 text-center text-sm opacity-60">No products match “{query}”.</li>}
           {results.map((p) => (
             <li key={p.id} className="group flex items-center gap-4 rounded-2xl p-2 transition hover:bg-white">
